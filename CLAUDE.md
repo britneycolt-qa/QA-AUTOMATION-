@@ -326,7 +326,43 @@ El QA va a recibir material del cliente. Reglas para analizarlo bien:
 | Estado de El Consejo | `npm run check-council` |
 | Convertir PDF/Excel/Word | `markitdown <archivo> > <archivo>.md` |
 
-## 5 · NUNCA
+## 5 · GIT — rama main como fuente de verdad
+
+Todo trabajo se integra a **`main`**. No hay ramas de feature ni PRs intermedios:
+cada avance estable se commitea y se pushea directamente.
+
+### Regla de commit y push
+
+Después de cualquier cambio relevante (nuevo test, spec, corrección, config):
+
+```bash
+git add <archivos>
+git commit -m "tipo: descripción breve"
+git push origin main
+```
+
+**Cuándo commitear y pushear:**
+- Al terminar de construir o modificar un test y pasó su corrida.
+- Al crear o actualizar un spec (`.spec.md`) o consejo (`.council.md`).
+- Al agregar o completar la ficha de un cliente (`AGENTS.md`).
+- Al registrar un hallazgo en `problemas.md` o `docs/lessons.md`.
+- Al final de cada sesión de trabajo, sin excepción.
+
+**Tipos de commit:**
+| Prefijo | Cuándo |
+|---|---|
+| `feat:` | nuevo test, nuevo cliente, nueva funcionalidad |
+| `fix:` | corrección de test fallido o bug de infraestructura |
+| `spec:` | nuevo o actualizado `.spec.md` |
+| `council:` | consejo completado o actualizado |
+| `chore:` | config, dependencias, scripts |
+| `docs:` | AGENTS.md, lessons.md, problemas.md |
+
+> **Regla agéntica:** cada vez que yo (el agente) hago un cambio en archivos del
+> repo, commiteo y pusheo antes de pasar al siguiente paso. El repo en GitHub
+> siempre refleja el estado real del trabajo.
+
+## 6 · NUNCA
 
 - ❌ Inventar reglas de negocio, URLs o credenciales: **preguntá**.
 - ❌ Commitear `.env` o cualquier secreto (revisá el `.gitignore`).
