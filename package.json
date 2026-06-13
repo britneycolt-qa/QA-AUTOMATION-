@@ -7,6 +7,7 @@
     "test": "npx playwright test --config projects/_template/playwright.config.ts",
     "test:smoke": "npx playwright test --config projects/_template/playwright.config.ts --grep @smoke",
     "check-specs": "node scripts/check-specs.mjs",
+    "check-council": "node scripts/check-council.mjs",
     "report:publish": "node -e \"const c=process.argv[1]; require('child_process').execSync('npx wrangler pages deploy projects/'+c+'/monocart-report --project-name=qa-reportes-'+c+' --branch=main',{stdio:'inherit'})\""
   },
   "repository": {

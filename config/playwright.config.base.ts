@@ -1,6 +1,8 @@
 import { defineConfig, type PlaywrightTestConfig } from '@playwright/test';
 import path from 'node:path';
 
+const COUNCIL_REPORTER = path.resolve(__dirname, '../scripts/council-reporter.mjs');
+
 const isCI = !!process.env.CI;
 
 export const baseConfig: PlaywrightTestConfig = {
@@ -33,6 +35,7 @@ export function createProjectConfig(overrides: PlaywrightTestConfig): Playwright
         outputFile: path.join(projectRoot, 'monocart-report', 'index.html'),
       }],
       ['json', { outputFile: path.join(projectRoot, 'test-results', 'results.json') }],
+      [COUNCIL_REPORTER],
     ] as PlaywrightTestConfig['reporter'],
   });
 }
