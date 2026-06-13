@@ -9,7 +9,7 @@
  * Uso: agregado en playwright.config.base.ts como reporter.
  */
 
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 
 const COUNCIL_POINTS = [
@@ -85,6 +85,9 @@ export default class CouncilReporter {
   }
 
   onEnd(result) {
+    // ── Auto-update REGISTRO.md (regla: "tras cada corrida: una fila") ──
+    this._appendRegistro(result);
+
     const unreviewed = this._results.filter(({ test }) =>
       extractTags(test.title).includes('@unreviewed')
     );
@@ -154,6 +157,39 @@ export default class CouncilReporter {
     console.log('═'.repeat(70));
     console.log('  Corré: npm run check-council   para validar el estado completo');
     console.log('═'.repeat(70) + '\n');
+  }
+
+  _appendRegistro(runResult) {
+    // Determina el proyecto desde el primer test con archivo
+    const firstSpec = this._results.find(r => r.test.location?.file)?.test.location?.file;
+    const projectDir = firstSpec ? this._findProjectDir(firstSpec) : null;
+    if (!projectDir) return;
+
+    const registroPath = join(projectDir, 'evidencias', 'REGISTRO.md');
+    if (!existsSync(registroPath)) return;
+
+    const total = this._results.length;
+    const passed = this._results.filter(r => r.result.status === 'passed').length;
+    const failed = this._results.filter(r => r.result.status === 'failed').length;
+    const flaky  = this._results.filter(r => r.result.status === 'flaky').length;
+    const resultado = failed > 0 ? '❌ FAIL' : flaky > 0 ? '⚠️ FLAKY' : '✅ PASS';
+
+    const now = new Date();
+    const fecha = now.toISOString().slice(0, 10);
+    const hora  = now.toTimeString().slice(0, 5);
+
+    // Detecta módulos únicos corridos
+    const modulos = [...new Set(
+      this._results.map(r => {
+        const f = r.test.location?.file || '';
+        const m = f.match(/tests\/regression\/([^/]+)\//);
+        return m ? m[1] : basename(f).replace('.spec.ts', '');
+      })
+    )].join(', ');
+
+    const row = `| ${fecha} ${hora} | ${modulos} | ${resultado} | ${passed} | ${failed}${flaky ? ` (${flaky} flaky)` : ''} | local: ${projectDir.split('/').slice(-1)[0]}/monocart-report/index.html |\n`;
+    appendFileSync(registroPath, row);
+    console.log(`\n📋 REGISTRO.md actualizado — ${fecha} ${hora} · ${resultado} (${passed}/${total})`);
   }
 
   _findProjectDir(specFile) {

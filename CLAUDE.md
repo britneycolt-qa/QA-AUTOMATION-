@@ -50,14 +50,18 @@ npx playwright install chromium   # baja el navegador (puede tardar unos minutos
 
 ```
 config/
-  playwright.config.base.ts   # config compartida (reporters pulidos, evidencia)
+  playwright.config.base.ts   # config compartida (reporters pulidos, evidencia, El Consejo)
+scripts/
+  check-specs.mjs             # valida que cada .spec.ts tenga su .spec.md
+  check-council.mjs           # valida El Consejo — bloquea @regression sin consejo completo
+  council-reporter.mjs        # reporter Playwright: imprime El Consejo + auto-actualiza REGISTRO.md
 projects/
   _template/                  # plantilla: copiala para cada cliente nuevo
     AGENTS.md                 # URLs, usuarios de prueba, particularidades del cliente
     .env.example              # forma del .env (sin secretos reales)
-    specs/                    # especificaciones .spec.md (QUÉ se prueba, en lenguaje claro)
+    specs/                    # especificaciones .spec.md + .council.md por cada flujo
     tests/regression/         # pruebas .spec.ts organizadas POR MÓDULO
-    evidencias/REGISTRO.md    # bitácora: una fila por corrida
+    evidencias/REGISTRO.md    # bitácora: una fila por corrida (auto-actualizada)
     problemas.md              # hallazgos/bloqueos (append-only, no se borra)
     playwright.config.ts
 docs/lessons.md               # aprendizajes que sirven a todos los clientes
@@ -74,6 +78,9 @@ HTML estilizado que abre con doble clic, sin problemas de CORS) y garantiza que
 ```ts
 import { defineConfig, type PlaywrightTestConfig } from '@playwright/test';
 import path from 'node:path';
+
+// Reporter del Consejo: se resuelve desde la raíz del monorepo
+const COUNCIL_REPORTER = path.resolve(__dirname, '../scripts/council-reporter.mjs');
 
 const isCI = !!process.env.CI;
 
@@ -109,6 +116,8 @@ export function createProjectConfig(overrides: PlaywrightTestConfig): Playwright
       }],
       // Resumen JSON: lo lee el agente para contarte los resultados.
       ['json', { outputFile: path.join(projectRoot, 'test-results', 'results.json') }],
+      // El Consejo: 5 miradas + auto-update REGISTRO.md tras cada corrida.
+      [COUNCIL_REPORTER],
     ] as PlaywrightTestConfig['reporter'],
   });
 }
@@ -297,9 +306,8 @@ El QA va a recibir material del cliente. Reglas para analizarlo bien:
 - **Imágenes/capturas**: podés verlas directamente — miralas ANTES de opinar;
   nunca "adivines" qué muestran.
 - **PDF, Word, Excel, PowerPoint**: convertilos a Markdown ANTES de analizarlos
-  con **MarkItDown** (microsoft/markitdown). Instalación (una vez):
-  `pipx install 'markitdown[all]'` (o `pip install`). Uso:
-  `markitdown <archivo> > <archivo>.md` → analizá el `.md`, no el binario.
+  con **MarkItDown** (microsoft/markitdown). Ya instalado (`markitdown 0.0.2` vía pipx).
+  Uso: `markitdown <archivo> > <archivo>.md` → analizá el `.md`, no el binario.
   Si la conversión sale vacía, **PARÁ y decílo** — no inventes el contenido.
 - Lo útil de ese material (criterios, flujos, datos) se vuelca al **spec** del
   flujo o al `AGENTS.md` del cliente — nunca queda solo en el chat.
@@ -314,6 +322,9 @@ El QA va a recibir material del cliente. Reglas para analizarlo bien:
 | Ver el reporte | abrir `projects/<c>/monocart-report/index.html` |
 | Publicar el reporte | `npm run report:publish -- <c>` |
 | Depurar una prueba | agregar `--debug` (o `--ui`) |
+| Verificar specs completos | `npm run check-specs` |
+| Estado de El Consejo | `npm run check-council` |
+| Convertir PDF/Excel/Word | `markitdown <archivo> > <archivo>.md` |
 
 ## 5 · NUNCA
 
