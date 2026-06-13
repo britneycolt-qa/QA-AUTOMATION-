@@ -1,0 +1,30 @@
+{
+  "name": "qa-automation-",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test --config projects/_template/playwright.config.ts",
+    "test:smoke": "npx playwright test --config projects/_template/playwright.config.ts --grep @smoke",
+    "report:publish": "node -e \"const c=process.argv[1]; require('child_process').execSync('npx wrangler pages deploy projects/'+c+'/monocart-report --project-name=qa-reportes-'+c+' --branch=main',{stdio:'inherit'})\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/britneycolt-qa/QA-AUTOMATION-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/britneycolt-qa/QA-AUTOMATION-/issues"
+  },
+  "homepage": "https://github.com/britneycolt-qa/QA-AUTOMATION-#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.3",
+    "dotenv": "^17.4.2",
+    "monocart-reporter": "^2.11.2",
+    "typescript": "^6.0.3"
+  }
+}

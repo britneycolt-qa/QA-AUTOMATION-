@@ -1,0 +1,7 @@
+node_modules/
+.env
+test-results/
+*-report/
+playwright-report/
+monocart-report/
+*.zip
