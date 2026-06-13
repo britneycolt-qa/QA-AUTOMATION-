@@ -45,9 +45,13 @@ function extractSpecHeader(specFile) {
 function councilComplete(councilFile) {
   if (!existsSync(councilFile)) return false;
   const content = readFileSync(councilFile, 'utf8');
-  return COUNCIL_POINTS.every(p => {
-    const rx = new RegExp(`\\*\\*${p.label}\\*\\*[^\\n]*\\n[^\\n]*\\[x\\]`, 'i');
-    return rx.test(content);
+  return COUNCIL_POINTS.every((p, i) => {
+    const nextLabel = COUNCIL_POINTS[i + 1]?.label;
+    const sectionRx = nextLabel
+      ? new RegExp(`\\*\\*${p.label}\\*\\*[\\s\\S]*?(?=\\*\\*${nextLabel}\\*\\*)`, 'i')
+      : new RegExp(`\\*\\*${p.label}\\*\\*[\\s\\S]*$`, 'i');
+    const section = content.match(sectionRx)?.[0] ?? '';
+    return /\[x\]/i.test(section);
   });
 }
 

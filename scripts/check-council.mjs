@@ -49,9 +49,16 @@ function findProjectDir(absSpecPath) {
 
 function checkCouncilPoints(councilFile) {
   const content = readFileSync(councilFile, 'utf8');
-  return COUNCIL_POINTS.map(p => {
-    const rx = new RegExp(`\\*\\*${p.label}\\*\\*[^\\n]*\\n[^\\n]*\\[x\\]`, 'i');
-    return { ...p, approved: rx.test(content) };
+  // Divide el archivo en secciones por cada punto (## ... **Label**)
+  // y busca [x] dentro de la sección correspondiente
+  return COUNCIL_POINTS.map((p, i) => {
+    const nextLabel = COUNCIL_POINTS[i + 1]?.label;
+    // Extrae el texto desde el label hasta el próximo label (o fin de archivo)
+    const sectionRx = nextLabel
+      ? new RegExp(`\\*\\*${p.label}\\*\\*[\\s\\S]*?(?=\\*\\*${nextLabel}\\*\\*)`, 'i')
+      : new RegExp(`\\*\\*${p.label}\\*\\*[\\s\\S]*$`, 'i');
+    const section = content.match(sectionRx)?.[0] ?? '';
+    return { ...p, approved: /\[x\]/i.test(section) };
   });
 }
 
