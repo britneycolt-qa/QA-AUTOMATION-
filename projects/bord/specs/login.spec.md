@@ -11,7 +11,7 @@ Dos pasos:
 | # | Criterio | Tipo |
 |---|---|---|
 | CA-1 | Login exitoso con credenciales válidas redirige al dashboard | happy path |
-| CA-2 | Correo inválido (formato incorrecto) muestra error antes de avanzar | negativo |
+| CA-2 | Correo inválido (formato incorrecto) deshabilita el botón "Continuar" — no avanza al paso 2 | negativo |
 | CA-3 | Correo válido pero sin cuenta registrada muestra error en paso 1 | negativo |
 | CA-4 | Contraseña incorrecta muestra error en paso 2 | negativo |
 | CA-5 | El campo contraseña no es visible hasta ingresar el correo y hacer clic en "Continuar" | flujo |

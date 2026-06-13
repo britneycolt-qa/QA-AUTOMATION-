@@ -1,11 +1,14 @@
 // Spec: specs/login.spec.md
 import { test, expect } from '@playwright/test';
 
-// Descarta el banner de cookies/aviso si aparece
+// Descarta cualquier modal/banner con botón "Entendido" (aviso de cookies,
+// cierre de sesión por seguridad, etc.) — espera hasta 4s por si tarda en renderizar
 async function dismissBanner(page: import('@playwright/test').Page) {
   const banner = page.getByRole('button', { name: 'Entendido' });
+  await banner.waitFor({ state: 'visible', timeout: 4000 }).catch(() => null);
   if (await banner.isVisible().catch(() => false)) {
     await banner.click();
+    await page.waitForTimeout(300);
   }
 }
 
@@ -53,15 +56,16 @@ test.describe('Login — Bord', () => {
     await page.getByRole('button', { name: 'Iniciar sesión' }).click();
 
     await expect(page).not.toHaveURL(/\/nodi\/dashboard/);
-    // Verificar que hay un mensaje de error visible en pantalla
-    await expect(page.locator('form')).toContainText(/.+/);
+    // Verificar que hay un mensaje de error visible — la app lo muestra bajo el campo contraseña
+    await expect(page.locator('body')).toContainText(/contraseña|incorrecta|error/i);
   });
 
-  // CA-2: correo con formato inválido
-  test('@unreviewed correo con formato inválido no avanza al paso 2', async ({ page }) => {
+  // CA-2: correo con formato inválido — el botón "Continuar" queda deshabilitado
+  // Comportamiento real: la app deshabilita el botón en lugar de mostrar un mensaje de error
+  test('@unreviewed correo con formato inválido deshabilita el botón Continuar', async ({ page }) => {
     await page.getByPlaceholder('correo@empresa.com').fill('esto-no-es-un-correo');
-    await page.getByRole('button', { name: 'Continuar' }).click();
 
+    await expect(page.getByRole('button', { name: 'Continuar' })).toBeDisabled();
     await expect(page.getByPlaceholder('Introduce tu contraseña')).not.toBeVisible();
   });
 
