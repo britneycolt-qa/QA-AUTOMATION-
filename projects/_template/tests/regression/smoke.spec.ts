@@ -1,4 +1,4 @@
-// Spec: smoke — verifica que el monorepo y Playwright están operativos
+// Spec: specs/smoke.spec.md
 import { test, expect } from '@playwright/test';
 
 test('@smoke @unreviewed monorepo smoke — Playwright levanta y navega', async ({ page }) => {
